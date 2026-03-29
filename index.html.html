@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>If Not a Doctor, Then Who? — ARYA</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@200;300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #2E5FA1; 
+    --sky: #85B7EB;      
+    --bg: #FFFFFF;       
+    --text-dark: #1A2B3C;
+    --neon-blue: rgba(46, 95, 161, 0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Montserrat', sans-serif; color: var(--text-dark); }
+
+/* --- FUTURISTIC LAYERS --- */
+.canvas-bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(circle at 50% 50%, #fdfdff 0%, #e9f2ff 100%); }
+
+#mouse-glow {
+    position: fixed; width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(133, 183, 235, 0.15) 0%, transparent 70%);
+    border-radius: 50%; pointer-events: none; z-index: 1; transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+#cursor {
+    position: fixed; width: 10px; height: 10px; background: var(--primary);
+    border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+}
+#cursor-aura {
+    position: fixed; width: 40px; height: 40px; border: 1px solid var(--primary);
+    border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%, -50%);
+    transition: all 0.1s ease-out;
+}
+
+#particles { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+.orb {
+    position: absolute; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 40px var(--neon-blue), inset 0 0 20px rgba(255,255,255,0.6);
+    animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+    0% { transform: translateY(110vh) scale(0.5) rotate(0deg); opacity: 0; }
+    20% { opacity: 0.8; }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-20vh) scale(1.2) rotate(360deg); opacity: 0; }
+}
+
+.screen {
+    position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 40px;
+    opacity: 0; pointer-events: none; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1.05);
+}
+.screen.active { opacity: 1; pointer-events: all; transform: scale(1); }
+
+.home-btn {
+    position: fixed; top: 40px; left: 50px; z-index: 101; 
+    display: none; align-items: center; gap: 10px;
+    background: transparent; border: none;
+    color: var(--primary); font-weight: 800; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; cursor: none; transition: 0.3s;
+}
+.home-btn:hover { opacity: 0.7; transform: translateX(-5px); }
+
+.brand-header { position: fixed; top: 40px; right: 50px; z-index: 100; }
+.logo { width: 200px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); transition: 0.5s; }
+
+.frame { position: fixed; inset: 30px; border: 1px solid rgba(46, 95, 161, 0.05); pointer-events: none; z-index: 50; }
+.line-v { position: absolute; width: 1px; height: 100px; background: var(--primary); opacity: 0.4; }
+.line-h { position: absolute; height: 1px; width: 100px; background: var(--primary); opacity: 0.4; }
+.tl-v { top:0; left:0; } .tl-h { top:0; left:0; }
+.br-v { bottom:0; right:0; } .br-h { bottom:0; right:0; }
+
+.h1-hero { font-family: 'Cormorant Garamond', serif; font-size: clamp(60px, 8vw, 110px); line-height: 0.9; text-align: center; font-weight: 300; }
+.h1-hero em { font-style: italic; color: var(--primary); font-weight: 600; }
+.badge { text-transform: uppercase; letter-spacing: 6px; font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 30px; }
+
+.input-wrap { position: relative; width: 100%; max-width: 600px; margin-top: 40px; }
+#doc-name {
+    width: 100%; background: transparent; border: none; border-bottom: 2px solid var(--sky);
+    font-family: 'Cormorant Garamond', serif; font-size: 45px; color: var(--primary);
+    text-align: center; outline: none; padding: 15px; transition: 0.4s;
+}
+#doc-name:focus { border-bottom-color: var(--primary); letter-spacing: 2px; }
+
+.btn-cyber {
+    background: var(--primary); color: white; border: none; padding: 22px 50px;
+    font-size: 12px; font-weight: 800; letter-spacing: 3px; border-radius: 2px;
+    cursor: none; position: relative; overflow: hidden; transition: 0.4s;
+    box-shadow: 0 10px 30px rgba(46, 95, 161, 0.2);
+}
+.btn-cyber:hover { transform: translateY(-5px); background: #1a437a; box-shadow: 0 20px 40px rgba(46, 95, 161, 0.4); }
+
+#s-reveal { flex-direction: row; padding: 0; background: white; }
+.img-panel { flex: 0 0 50%; height: 100%; position: relative; overflow: hidden; }
+#reveal-img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.1); transition: 10s linear transform; }
+.img-gradient { position: absolute; inset: 0; background: linear-gradient(90deg, transparent 70%, white 100%); }
+
+.text-panel { flex: 1; padding: 80px; display: flex; flex-direction: column; justify-content: center; }
+.alter-title { font-family: 'Cormorant Garamond', serif; font-size: 80px; color: var(--primary); margin-bottom: 15px; opacity: 0; transform: translateY(30px); }
+.active .alter-title { animation: fadeUp 1s forwards 0.5s; }
+
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 1024px) {
+    #s-reveal { flex-direction: column; }
+    .img-panel { flex: 0 0 40%; }
+    .img-gradient { background: linear-gradient(0deg, white 10%, transparent 100%); }
+    .text-panel { padding: 40px; text-align: center; }
+    .home-btn { top: 15px; left: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-aura"></div>
+<div id="mouse-glow"></div>
+<div class="canvas-bg"></div>
+<div id="particles"></div>
+
+<button class="home-btn" id="home-trigger" onclick="location.reload()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    RESTART
+</button>
+
+<div class="frame">
+    <div class="line-v tl-v"></div><div class="line-h tl-h"></div>
+    <div class="line-v br-v"></div><div class="line-h br-h"></div>
+</div>
+
+<header class="brand-header">
+    <img src="logo.png" alt="ARYA" class="logo">
+</header>
+
+<div class="screen active" id="s-welcome">
+    <div class="badge">ARYA PHARMALAB • REINVENTING LIVES</div>
+    <h1 class="h1-hero">If not a <em>Doctor</em>,<br>then <em>who?</em></h1>
+    <p style="margin-top:20px; color: #666; font-weight: 300; letter-spacing: 2px;">DISCOVER YOUR ALTER PERSONA</p>
+    <br><br><br>
+    <button class="btn-cyber" onclick="goTo('s-name')">INITIATE DISCOVERY</button>
+</div>
+
+<div class="screen" id="s-name">
+    <div class="badge">Identity Validation</div>
+    <h2 class="h1-hero" style="font-size: 50px;">Awaiting your name, <em>Doctor</em></h2>
+    <div class="input-wrap">
+        <input type="text" id="doc-name" placeholder="Type here..." autocomplete="off">
+    </div>
+    <br><br>
+    <button class="btn-cyber" onclick="submitName()">LET'S START</button>
+</div>
+
+<div class="screen" id="s-questions">
+    <div class="badge" id="q-progress">Phase 01</div>
+    <div id="q-txt" class="h1-hero" style="font-size: 40px; margin-bottom: 50px; max-width: 800px;"></div>
+    <div id="q-opts" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 900px;"></div>
+</div>
+
+<div class="screen" id="s-reveal">
+    <div class="img-panel">
+        <img id="reveal-img" src="" alt="Persona">
+        <div class="img-gradient"></div>
+    </div>
+    <div class="text-panel">
+        <div class="badge" style="margin-bottom: 10px;">Transformation Complete</div>
+        <h4 id="r-doc-name" style="text-transform: uppercase; letter-spacing: 3px; font-weight: 400; color: #666;"></h4>
+        <h1 class="alter-title" id="r-title"></h1>
+        <p id="r-desc" style="line-height: 1.8; font-size: 16px; color: var(--text-dark); max-width: 500px; margin-bottom: 40px;"></p>
+        <button class="btn-cyber" style="width: fit-content;" onclick="location.reload()">NEW ANALYSIS</button>
+    </div>
+</div>
+
+<script>
+/* --- INTERACTIVE CURSOR & GLOW --- */
+const cursor = document.getElementById('cursor');
+const aura = document.getElementById('cursor-aura');
+const glow = document.getElementById('mouse-glow');
+
+document.addEventListener('mousemove', (e) => {
+    const x = e.clientX, y = e.clientY;
+    cursor.style.left = x + 'px'; cursor.style.top = y + 'px';
+    aura.style.left = x + 'px'; aura.style.top = y + 'px';
+    glow.style.left = x + 'px'; glow.style.top = y + 'px';
+});
+
+/* --- NEON BUBBLE GENERATOR --- */
+function createOrbs() {
+    const container = document.getElementById('particles');
+    for(let i=0; i<35; i++) {
+        const orb = document.createElement('div');
+        orb.className = 'orb';
+        const size = Math.random() * 80 + 20;
+        orb.style.width = size + 'px';
+        orb.style.height = size + 'px';
+        orb.style.left = Math.random() * 100 + '%';
+        orb.style.animationDuration = (Math.random() * 12 + 8) + 's';
+        orb.style.animationDelay = (Math.random() * 5) + 's';
+        container.appendChild(orb);
+    }
+}
+createOrbs();
+
+/* --- LOGIC ENGINE --- */
+const questions = [
+    { text: "When you enter a room, what is the 'vibe' you project?", opts: [{k:'A',t:'Absolute Magnetism'}, {k:'B',t:'Radiant Warmth'}, {k:'C',t:'Intelligent Calm'}, {k:'D',t:'Creative Mystery'}] },
+    { text: "At a grand evening event, you are most likely?", opts: [{k:'A',t:'The one the entire room is quietly watching'}, {k:'B',t:'The one every important conversation revolves around'}, {k:'C',t:'The one who makes everyone light up and laugh'}, {k:'D',t:'The quiet force the night is built around'}] },
+    { text: "How would the world best remember you?", opts: [{k:'A',t:'As a Style Icon'}, {k:'B',t:'As a People\'s Hero'}, {k:'C',t:'As the Voice of Truth'}, {k:'D',t:'As a Master Creator'}] },
+    { text: "If your life had a soundtrack right now, it would be?", opts: [{k:'A',t:'A grand Bollywood title track — vivid and cinematic'}, {k:'B',t:'A sweeping Hollywood score — epic and powerful'}, {k:'C',t:'A crisp breaking-news theme — sharp and authoritative'}, {k:'D',t:'A standing ovation — triumphant and theatrical'}] }
+];
+
+const personas = {
+    A: { title: "Supermodel", img: "Supermodel.webp", desc: "You possess a natural poise that commands the world's attention without saying a word. In another life, every runway was yours." },
+    B: { title: "Bollywood Actress", img: "Bollywood Actress.jpeg", desc: "Your charisma is cinematic. You have the rare gift of connecting with millions through a single look. A true icon of the silver screen." },
+    C: { title: "News Anchor", img: "News Anchor.jpg", desc: "The world listens when you speak. Articulate, sharp, and trusted—you were destined to lead the conversation on a global scale." },
+    D: { title: "Hollywood Actress", img: "Hollywood Actress.jpg", desc: "You see the hidden soul in everything. Your vision transforms the ordinary into the extraordinary. A master of emotion and craft." },
+    E: { title: "Social Media Icon", img: "Social Media Icon.webp", desc: "Your presence is felt everywhere. You have the ability to influence and inspire a digital generation with your unique perspective." },
+    F: { title: "Theatre Actress", img: "Theatre Actress.jpg", desc: "You bring raw emotion to life. Your talent for performance is timeless, captivating audiences with every live performance." }
+};
+
+let currentQ = 0, score = {A:0, B:0, C:0, D:0}, docNameVal = "";
+
+function goTo(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(id);
+    target.classList.add('active');
+    
+    const homeBtn = document.getElementById('home-trigger');
+    homeBtn.style.display = (id === 's-welcome') ? 'none' : 'flex';
+}
+
+function submitName() {
+    docNameVal = document.getElementById('doc-name').value.trim();
+    if(!docNameVal) return;
+    if(!docNameVal.toLowerCase().startsWith('dr.')) docNameVal = "Dr. " + docNameVal;
+    renderQ();
+    goTo('s-questions');
+}
+
+function renderQ() {
+    const q = questions[currentQ];
+    document.getElementById('q-progress').innerText = `Phase 0${currentQ + 1}`;
+    document.getElementById('q-txt').innerText = q.text;
+    const container = document.getElementById('q-opts');
+    container.innerHTML = "";
+    q.opts.forEach(o => {
+        const div = document.createElement('div');
+        div.style.cssText = "background: rgba(255,255,255,0.7); border: 1px solid rgba(46,95,161,0.2); padding: 25px; border-radius: 4px; transition: 0.3s; font-weight: 600; text-align: center; cursor: pointer;";
+        div.innerText = o.t;
+        div.onmouseover = () => { div.style.borderColor = "var(--primary)"; div.style.background = "#fff"; aura.style.width = '60px'; aura.style.height = '60px'; };
+        div.onmouseout = () => { div.style.borderColor = "rgba(46,95,161,0.2)"; aura.style.width = '40px'; aura.style.height = '40px'; };
+        div.onclick = () => { score[o.k]++; nextQ(); };
+        container.appendChild(div);
+    });
+}
+
+function nextQ() {
+    currentQ++;
+    if(currentQ < questions.length) renderQ();
+    else reveal();
+}
+
+function reveal() {
+    const winner = Object.keys(score).reduce((a, b) => score[a] > score[b] ? a : b);
+    const result = personas[winner];
+    document.getElementById('reveal-img').src = result.img;
+    document.getElementById('r-doc-name').innerText = docNameVal + ", you are —";
+    document.getElementById('r-title').innerText = result.title;
+    document.getElementById('r-desc').innerText = result.desc;
+    goTo('s-reveal');
+    setTimeout(() => { document.getElementById('reveal-img').style.transform = 'scale(1.15)'; }, 100);
+}
+</script>
+</body>
+</html>
